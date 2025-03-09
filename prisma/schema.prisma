@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth.js Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  documents     Document[]
+  courses       Course[]
+  studySessions StudySession[]
+}
+
+// Application Models
+model Document {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  fileUrl     String
+  fileType    String
+  courseId    String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course?  @relation(fields: [courseId], references: [id])
+  questions   Question[]
+  flashcards  Flashcard[]
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents   Document[]
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  question    String   @db.Text
+  answer      String   @db.Text
+  type        String   // multiple_choice, open_ended, etc.
+  options     String[] // For multiple choice questions
+  documentId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  responses   QuestionResponse[]
+}
+
+model Flashcard {
+  id          String   @id @default(cuid())
+  front       String   @db.Text
+  back        String   @db.Text
+  documentId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  reviews     FlashcardReview[]
+}
+
+model StudySession {
+  id          String   @id @default(cuid())
+  userId      String
+  startTime   DateTime @default(now())
+  endTime     DateTime?
+  duration    Int?     // in minutes
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses   QuestionResponse[]
+  reviews     FlashcardReview[]
+}
+
+model QuestionResponse {
+  id             String   @id @default(cuid())
+  questionId     String
+  studySessionId String
+  response       String   @db.Text
+  isCorrect      Boolean
+  createdAt      DateTime @default(now())
+
+  question       Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  studySession   StudySession @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
+}
+
+model FlashcardReview {
+  id             String   @id @default(cuid())
+  flashcardId    String
+  studySessionId String
+  confidence     Int      // 1-5 scale
+  createdAt      DateTime @default(now())
+
+  flashcard      Flashcard    @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  studySession   StudySession @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
+}
