@@ -17,9 +17,11 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     return null;
   }
 
+  const { documentId } = params;
+
   const document = await db.document.findUnique({
     where: {
-      id: params.documentId,
+      id: documentId,
       userId: user.id,
     },
     include: {

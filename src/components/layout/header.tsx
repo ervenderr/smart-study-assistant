@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Menu } from "lucide-react";
+import {
+  Menu,
+  LayoutDashboard,
+  FileText,
+  BookOpen,
+  Clock,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,14 +28,15 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetFooter,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard" },
-  { name: "Documents", href: "/documents" },
-  { name: "Courses", href: "/courses" },
-  { name: "Study Sessions", href: "/study-sessions" },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Documents", href: "/documents", icon: FileText },
+  { name: "Courses", href: "/courses", icon: BookOpen },
+  { name: "Study Sessions", href: "/study-sessions", icon: Clock },
 ];
 
 interface HeaderProps {
@@ -52,26 +62,84 @@ export function Header({ user }: HeaderProps) {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left">
-              <SheetHeader>
-                <SheetTitle>Smart Study Assistant</SheetTitle>
+            <SheetContent side="left" className="w-[280px] sm:w-[350px] p-0">
+              <SheetHeader className="border-b px-6 py-4">
+                <SheetTitle className="text-xl">
+                  Smart Study Assistant
+                </SheetTitle>
               </SheetHeader>
-              <nav className="flex flex-col gap-2 mt-4">
+
+              {/* User profile in sidebar */}
+              <div className="flex items-center gap-4 px-6 py-4 border-b">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage
+                    src={user.image || ""}
+                    alt={user.name || "User avatar"}
+                  />
+                  <AvatarFallback>
+                    {user.name
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-medium">{user.name || "User"}</span>
+                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                    {user.email || ""}
+                  </span>
+                </div>
+              </div>
+
+              {/* Navigation links */}
+              <nav className="flex flex-col py-4">
                 {navigation.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "px-2 py-1.5 text-sm font-medium rounded-md transition-colors",
+                      "flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors",
                       pathname === item.href
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted"
+                        ? "bg-primary/10 text-primary border-l-4 border-primary"
+                        : "hover:bg-muted text-muted-foreground hover:text-foreground"
                     )}
                   >
+                    <item.icon className="h-5 w-5" />
                     {item.name}
                   </Link>
                 ))}
               </nav>
+
+              <div className="mt-auto border-t">
+                <div className="flex flex-col py-2">
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
+                  >
+                    <User className="h-5 w-5" />
+                    Profile
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
+                  >
+                    <Settings className="h-5 w-5" />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() =>
+                      signOut({
+                        callbackUrl: `${window.location.origin}/login`,
+                      })
+                    }
+                    className="flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors hover:bg-muted text-muted-foreground hover:text-foreground text-left"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Sign out
+                  </button>
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
         </div>
@@ -87,12 +155,13 @@ export function Header({ user }: HeaderProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
+                  "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
                   pathname === item.href
                     ? "text-primary font-semibold"
                     : "text-muted-foreground"
                 )}
               >
+                <item.icon className="h-4 w-4" />
                 {item.name}
               </Link>
             ))}
@@ -132,14 +201,20 @@ export function Header({ user }: HeaderProps) {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/profile">Profile</Link>
+                <Link href="/profile" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Profile
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings">Settings</Link>
+                <Link href="/settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="cursor-pointer flex items-center gap-2"
                 onSelect={(event) => {
                   event.preventDefault();
                   signOut({
@@ -147,6 +222,7 @@ export function Header({ user }: HeaderProps) {
                   });
                 }}
               >
+                <LogOut className="h-4 w-4" />
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@layer theme, base, components, utilities;
 
 @plugin "tailwindcss-animate";
 
@@ -116,9 +116,9 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 @import "@uploadthing/react/styles.css";
 
