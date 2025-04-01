@@ -1,4 +1,5 @@
 # Smart Study Assistant
+![image](https://github.com/user-attachments/assets/a0465fc8-e110-45df-a357-23f031730284)
 
 Smart Study Assistant is an advanced learning platform built with Next.js and modern web technologies that helps students optimize their study process through intelligent document management, AI-powered flashcard generation, and personalized study sessions.
 
