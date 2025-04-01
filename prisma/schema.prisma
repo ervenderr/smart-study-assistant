@@ -107,6 +107,9 @@ model Flashcard {
   front       String   @db.Text
   back        String   @db.Text
   documentId  String
+  difficulty  String   @default("medium") // easy, medium, hard
+  sourceText  String?  @db.Text // The original text from the document
+  status      String   @default("new") // new, learning, reviewing, mastered
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
